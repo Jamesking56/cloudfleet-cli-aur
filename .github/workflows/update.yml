@@ -1,0 +1,67 @@
+name: Update AUR
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # at minute 0, every 6th hour
+  workflow_dispatch:
+
+jobs:
+  update-aur:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout GitHub repository
+        uses: actions/checkout@v4
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl unzip git
+
+      - name: Fetch latest Cloudfleet version
+        id: cloudfleet
+        run: |
+          VERSION=$(curl -fsSL https://cloudfleet.ai/docs/introduction/install-cloudfleet-cli/ \
+                    | grep -oP 'cloudfleet_linux_\K[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+          echo "Latest version is $VERSION"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Update PKGBUILD and .SRCINFO
+        id: update
+        run: |
+          ./update.sh || echo "No update needed, exiting."
+        continue-on-error: true
+
+      - name: Set up SSH key
+        uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
+
+      - name: Set up AUR SSH
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts
+
+      - name: Prepare minimal AUR repo
+        run: |
+          rm -rf aur-repo
+          git clone --branch master "ssh://aur@aur.archlinux.org/cloudfleet-cli.git" aur-repo
+          cd aur-repo
+          cp ../PKGBUILD ../.SRCINFO ../README.md ./
+          git add -A
+          # Check if any changes exist
+          if git diff-index --quiet HEAD; then
+            echo "No changes detected. Skipping push."
+            exit 0  # Still success
+          else
+            git commit -m "Auto-update to $VERSION"
+            git push aur master
+          fi
+
+      - name: Success
+        run: echo "AUR repository updated or already up-to-date!"
