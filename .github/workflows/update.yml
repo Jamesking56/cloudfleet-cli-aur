@@ -85,6 +85,11 @@ jobs:
             git push origin master
           fi
 
+      - name: Configure GitHub push authentication
+        if: ${{ success() }}
+        run: |
+          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"    
+
       - name: Push changes to GitHub
         if: ${{ success() }}
         run: |
