@@ -89,12 +89,12 @@ jobs:
           fi
 
       - name: Configure GitHub push authentication
-        if: ${{ success() }}
+        if: success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
         run: |
           git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"    
 
       - name: Push changes to GitHub
-        if: ${{ success() }}
+        if: success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
         run: |
           git add PKGBUILD .SRCINFO
           if git diff-index --quiet HEAD; then
@@ -105,5 +105,5 @@ jobs:
           fi
 
       - name: Success
-        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
+        if: success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
         run: echo "AUR repository updated or already up-to-date!"
