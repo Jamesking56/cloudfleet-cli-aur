@@ -19,16 +19,18 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
 
-      - name: Install dependencies
+      - name: Install Cloudfleet CLI from APT
+        env:
+          NONINTERACTIVE: 1
         run: |
-          sudo apt-get update
-          sudo apt-get install -y curl unzip git
+          curl -fsSL https://downloads.cloudfleet.ai/apt/pubkey.gpg | sudo tee /usr/share/keyrings/cloudfleet-archive-keyring.gpg >/dev/null
+          echo "deb [signed-by=/usr/share/keyrings/cloudfleet-archive-keyring.gpg] https://downloads.cloudfleet.ai/apt stable main" | sudo tee /etc/apt/sources.list.d/cloudfleet.list
+          sudo apt-get install -y cloudfleet
 
-      - name: Fetch latest Cloudfleet version
+      - name: Get Cloudfleet version
         id: cloudfleet
         run: |
-          VERSION=$(curl -fsSL https://cloudfleet.ai/docs/introduction/install-cloudfleet-cli/ \
-                    | grep -oP 'cloudfleet_linux_\K[0-9]+\.[0-9]+\.[0-9]+' | head -1)
+          VERSION=$(cloudfleet --version | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
           echo "Latest version is $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
