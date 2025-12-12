@@ -1,6 +1,7 @@
 name: Update AUR
 
 on:
+  pull_request:
   schedule:
     - cron: '0 */6 * * *'  # at minute 0, every 6th hour
   workflow_dispatch:
