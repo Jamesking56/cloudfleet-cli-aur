@@ -38,9 +38,11 @@ jobs:
       - name: Update PKGBUILD and .SRCINFO
         id: update
         uses: addnab/docker-run-action@v3
+        env:
+          VERSION: ${{ env.VERSION }}
         with:
           image: archlinux:latest
-          options: --rm -v ${{ github.workspace }}:/src
+          options: --rm -e VERSION=${{ env.VERSION }} -v ${{ github.workspace }}:/src
           run: |
             pacman -Sy --noconfirm base-devel git
             cd /src
