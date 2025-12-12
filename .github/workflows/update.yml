@@ -34,8 +34,14 @@ jobs:
 
       - name: Update PKGBUILD and .SRCINFO
         id: update
-        run: |
-          ./update.sh
+        uses: addnab/docker-run-action@v3
+        with:
+          image: archlinux:latest
+          options: --rm -v ${{ github.workspace }}:/src
+          run: |
+            pacman -Sy --noconfirm base-devel git
+            cd /src
+            ./update.sh
 
       - name: Set up SSH key
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
