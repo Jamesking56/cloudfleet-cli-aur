@@ -35,8 +35,7 @@ jobs:
       - name: Update PKGBUILD and .SRCINFO
         id: update
         run: |
-          ./update.sh || echo "No update needed, exiting."
-        continue-on-error: true
+          ./update.sh
 
       - name: Set up SSH key
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
