@@ -44,9 +44,17 @@ jobs:
           image: archlinux:latest
           options: --rm -e VERSION=${{ env.VERSION }} -v ${{ github.workspace }}:/src
           run: |
+            # Install makepkg deps
             pacman -Sy --noconfirm base-devel git
-            cd /src
-            ./update.sh
+            
+            # Create non-root user
+            useradd -m builder
+            
+            # Give builder ownership of /src
+            chown -R builder:builder /src
+            
+            # Switch to builder and run the update script
+            su builder -c "cd /src && ./update.sh"
 
       - name: Set up SSH key
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
