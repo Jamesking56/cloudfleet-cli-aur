@@ -2,35 +2,22 @@
 set -euo pipefail
 
 PKGBUILD_FILE="PKGBUILD"
-DOCS_URL="https://cloudfleet.ai/docs/introduction/install-cloudfleet-cli/"
+
+# VERSION should be set by the GitHub Action from `cloudfleet --version`
+if [[ -z "${VERSION:-}" ]]; then
+  echo "ERROR: VERSION environment variable is not set"
+  exit 1
+fi
+
+LATEST="$VERSION"
+echo "Target version: $LATEST"
 
 echo "Fetching current pkgver..."
-CUR_VER=$(grep -oP '^pkgver\s*=\s*\K[0-9]+\.[0-9]+\.[0-9]+' "$PKGBUILD_FILE") || {
+CUR_VER=$(grep -oE '^pkgver\s*=\s*[0-9]+\.[0-9]+\.[0-9]+' "$PKGBUILD_FILE" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+') || {
   echo "ERROR: Could not parse current pkgver in PKGBUILD"
   exit 1
 }
 echo "Current pkgver: $CUR_VER"
-
-echo "Fetching docs page..."
-HTML=$(curl -fsSL -A "Mozilla/5.0 (compatible; CloudfleetUpdater/1.0)" "$DOCS_URL") || {
-  echo "ERROR: curl failed to fetch $DOCS_URL"
-  exit 1
-}
-echo "Downloaded docs page"
-
-echo "Extracting version numbers from download links..."
-VERSIONS=$(echo "$HTML" \
-  | grep -oP 'https://downloads\.cloudfleet\.ai/cli/\K[0-9]+\.[0-9]+\.[0-9]+(?=/cloudfleet_linux_(amd64|arm64)\.zip)' \
-  | sort -V \
-  | uniq)
-
-if [[ -z "$VERSIONS" ]]; then
-  echo "ERROR: No version numbers found in docs page!"
-  exit 1
-fi
-
-LATEST=$(echo "$VERSIONS" | tail -n1)
-echo "Detected latest version: $LATEST"
 
 # Early exit if already up-to-date
 if [[ "$LATEST" == "$CUR_VER" ]]; then
