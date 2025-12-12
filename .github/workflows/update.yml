@@ -71,6 +71,7 @@ jobs:
       - name: Prepare minimal AUR repo
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
         run: |
+          chmod -R u+w $GITHUB_WORKSPACE
           rm -rf aur-repo
           git clone --branch master "ssh://aur@aur.archlinux.org/cloudfleet-cli.git" aur-repo
           cd aur-repo
