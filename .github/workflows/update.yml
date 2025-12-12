@@ -26,7 +26,7 @@ jobs:
           curl -fsSL https://downloads.cloudfleet.ai/apt/pubkey.gpg | sudo tee /usr/share/keyrings/cloudfleet-archive-keyring.gpg >/dev/null
           echo "deb [signed-by=/usr/share/keyrings/cloudfleet-archive-keyring.gpg] https://downloads.cloudfleet.ai/apt stable main" | sudo tee /etc/apt/sources.list.d/cloudfleet.list
           sudo apt-get update
-          sudo apt-get install -y cloudfleet makepkg
+          sudo apt-get install -y cloudfleet curl git makepkg unzip
 
       - name: Get Cloudfleet version
         id: cloudfleet
