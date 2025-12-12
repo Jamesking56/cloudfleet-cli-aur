@@ -39,16 +39,19 @@ jobs:
         continue-on-error: true
 
       - name: Set up SSH key
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
         uses: webfactory/ssh-agent@v0.9.1
         with:
           ssh-private-key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
 
       - name: Set up AUR SSH
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan aur.archlinux.org >> ~/.ssh/known_hosts
 
       - name: Prepare minimal AUR repo
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
         run: |
           rm -rf aur-repo
           git clone --branch master "ssh://aur@aur.archlinux.org/cloudfleet-cli.git" aur-repo
@@ -65,4 +68,5 @@ jobs:
           fi
 
       - name: Success
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
         run: echo "AUR repository updated or already up-to-date!"
