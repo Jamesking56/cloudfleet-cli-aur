@@ -86,6 +86,17 @@ jobs:
             git push aur master
           fi
 
+      - name: Push changes to GitHub
+        if: ${{ success() }}
+        run: |
+          git add PKGBUILD .SRCINFO
+          if git diff-index --quiet HEAD; then
+            echo "No changes detected. Skipping GitHub commit."
+          else
+            git commit -m "Auto-update to $VERSION"
+            git push origin HEAD
+          fi
+
       - name: Success
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
         run: echo "AUR repository updated or already up-to-date!"
