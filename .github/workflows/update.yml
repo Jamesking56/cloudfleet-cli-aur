@@ -35,6 +35,12 @@ jobs:
           echo "Latest version is $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
+      - name: Get UID/GID
+        id: ids
+        run: |
+          echo "uid=$(id -u)" >> $GITHUB_OUTPUT
+          echo "gid=$(id -g)" >> $GITHUB_OUTPUT        
+
       - name: Update PKGBUILD and .SRCINFO
         id: update
         uses: addnab/docker-run-action@v3
@@ -42,7 +48,7 @@ jobs:
           VERSION: ${{ env.VERSION }}
         with:
           image: archlinux:latest
-          options: --rm -e VERSION=${{ env.VERSION }} -v ${{ github.workspace }}:/src -u $(id -u):$(id -g)
+          options: --rm -e VERSION=${{ env.VERSION }} -v ${{ github.workspace }}:/src -u ${{ steps.ids.outputs.uid }}:${{ steps.ids.outputs.gid }}
           run: |
             # Install makepkg deps
             pacman -Sy --noconfirm base-devel git
