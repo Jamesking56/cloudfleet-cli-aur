@@ -42,19 +42,13 @@ jobs:
           VERSION: ${{ env.VERSION }}
         with:
           image: archlinux:latest
-          options: --rm -e VERSION=${{ env.VERSION }} -v ${{ github.workspace }}:/src
+          options: --rm -e VERSION=${{ env.VERSION }} -v ${{ github.workspace }}:/src -u $(id -u):$(id -g)
           run: |
             # Install makepkg deps
             pacman -Sy --noconfirm base-devel git
             
-            # Create non-root user
-            useradd -m builder
-            
-            # Give builder ownership of /src
-            chown -R builder:builder /src
-            
-            # Switch to builder and run the update script
-            su builder -c "cd /src && ./update.sh"
+            # Run the update script
+            cd /src && ./update.sh
 
       - name: Set up SSH key
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
@@ -71,7 +65,6 @@ jobs:
       - name: Prepare minimal AUR repo
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
         run: |
-          chmod -R u+w $GITHUB_WORKSPACE
           rm -rf aur-repo
           git clone --branch master "ssh://aur@aur.archlinux.org/cloudfleet-cli.git" aur-repo
           cd aur-repo
