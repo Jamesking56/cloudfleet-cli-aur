@@ -82,7 +82,7 @@ jobs:
             exit 0  # Still success
           else
             git commit -m "Auto-update to $VERSION"
-            git push aur master
+            git push origin master
           fi
 
       - name: Push changes to GitHub
@@ -93,7 +93,7 @@ jobs:
             echo "No changes detected. Skipping GitHub commit."
           else
             git commit -m "Auto-update to $VERSION"
-            git push origin HEAD
+            git push origin master
           fi
 
       - name: Success
