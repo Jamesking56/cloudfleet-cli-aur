@@ -38,26 +38,24 @@ jobs:
           echo "Latest version is $VERSION"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
-      - name: Get UID/GID
-        id: ids
-        run: |
-          echo "uid=$(id -u)" >> $GITHUB_OUTPUT
-          echo "gid=$(id -g)" >> $GITHUB_OUTPUT        
-
       - name: Update PKGBUILD and .SRCINFO
         id: update
-        uses: addnab/docker-run-action@v3
         env:
           VERSION: ${{ env.VERSION }}
-        with:
-          image: archlinux:latest
-          options: --rm -e VERSION=${{ env.VERSION }} -v ${{ github.workspace }}:/src -u ${{ steps.ids.outputs.uid }}:${{ steps.ids.outputs.gid }}
-          run: |
-            # Install makepkg deps
-            pacman -Sy --noconfirm base-devel git
-            
-            # Run the update script
-            cd /src && ./update.sh
+        run: |
+          UID=$(id -u)
+          GID=$(id -g)
+
+          docker run --rm \
+            -e VERSION="${VERSION}" \
+            -v "${GITHUB_WORKSPACE}:/src" \
+            -w /src \
+            -u ${UID}:${GID} \
+            archlinux:latest \
+            bash -c "
+              pacman -Sy --noconfirm base-devel git &&
+              ./update.sh
+            "
 
       - name: Set up SSH key
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
@@ -82,7 +80,7 @@ jobs:
           # Check if any changes exist
           if git diff-index --quiet HEAD; then
             echo "No changes detected. Skipping push."
-            exit 0  # Still success
+            exit 0 # Still success
           else
             git commit -m "Auto-update to $VERSION"
             git push origin master
@@ -91,7 +89,7 @@ jobs:
       - name: Configure GitHub push authentication
         if: success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
         run: |
-          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"    
+          git remote set-url origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
 
       - name: Push changes to GitHub
         if: success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
