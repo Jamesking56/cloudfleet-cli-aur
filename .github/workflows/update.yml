@@ -95,7 +95,8 @@ jobs:
         if: success() && github.event_name != 'pull_request' && github.ref == 'refs/heads/master'
         run: |
           git add PKGBUILD .SRCINFO
-          if git diff-index --quiet HEAD; then
+      
+          if git diff --quiet --cached; then
             echo "No changes detected. Skipping GitHub commit."
           else
             git commit -m "Auto-update to $VERSION"
