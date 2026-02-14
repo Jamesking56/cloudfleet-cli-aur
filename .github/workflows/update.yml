@@ -45,16 +45,16 @@ jobs:
         run: |
           RUN_UID=$(id -u)
           RUN_GID=$(id -g)
-
+      
           docker run --rm \
             -e VERSION="${VERSION}" \
             -v "${GITHUB_WORKSPACE}:/src" \
             -w /src \
-            -u ${RUN_UID}:${RUN_GID} \
             archlinux:latest \
             bash -c "
               pacman -Sy --noconfirm base-devel git &&
-              ./update.sh
+              ./update.sh &&
+              chown -R ${RUN_UID}:${RUN_GID} /src
             "
 
       - name: Set up SSH key
