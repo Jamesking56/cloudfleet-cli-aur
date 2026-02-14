@@ -43,14 +43,14 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
         run: |
-          UID=$(id -u)
-          GID=$(id -g)
+          RUN_UID=$(id -u)
+          RUN_GID=$(id -g)
 
           docker run --rm \
             -e VERSION="${VERSION}" \
             -v "${GITHUB_WORKSPACE}:/src" \
             -w /src \
-            -u ${UID}:${GID} \
+            -u ${RUN_UID}:${RUN_GID} \
             archlinux:latest \
             bash -c "
               pacman -Sy --noconfirm base-devel git &&
