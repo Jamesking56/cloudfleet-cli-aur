@@ -53,7 +53,9 @@ jobs:
             archlinux:latest \
             bash -c "
               pacman -Sy --noconfirm base-devel git &&
-              ./update.sh &&
+              useradd -m builduser &&
+              chown -R builduser:builduser /src &&
+              su builduser -c './update.sh' &&
               chown -R ${RUN_UID}:${RUN_GID} /src
             "
 
