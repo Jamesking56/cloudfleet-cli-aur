@@ -1,22 +1,6 @@
 {
-  "extends": [
-    "config:recommended",
-    "replacements:all",
-    ":automergeMinor",
-    ":automergePr",
-    ":automergeRequireAllStatusChecks",
-    ":combinePatchMinorReleases",
-    ":rebaseStalePrs",
-    ":renovatePrefix",
-    ":separateMultipleMajorReleases"
-  ],
-  "additionalReviewers": ["Jamesking56"],
-  "dependencyDashboardAutoclose": true,
-  "platformAutomerge": true,
-  "rollbackPrs": true,
-  "vulnerabilityAlerts": {
-    "enabled": true,
-    "labels": ["security"],
-    "schedule": "at any time"
-  }
+    "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+    "extends": [
+        "local>Jamesking56/.github:renovate-config"
+    ]
 }
